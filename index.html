@@ -1,1 +1,1366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заметки AI</title>
 
+<style>
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #0b0d10;
+    --sidebar: #111318;
+    --panel: #15181e;
+    --panel2: #1b1f27;
+    --border: #292e38;
+    --text: #f4f6fa;
+    --muted: #8c95a3;
+    --accent: #4f8cff;
+    --accent-hover: #6b9cff;
+    --danger: #ff626b;
+    --green: #42d99b;
+    --yellow: #ffd45c;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 270px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.logo {
+    padding: 22px 20px 18px;
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.logo span {
+    color: var(--accent);
+}
+
+.new-note {
+    margin: 0 16px 14px;
+    padding: 13px;
+    border: 0;
+    border-radius: 11px;
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+    transition: .2s;
+}
+
+.new-note:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.search {
+    padding: 0 16px 14px;
+}
+
+.search input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    outline: none;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: white;
+}
+
+.search input:focus {
+    border-color: var(--accent);
+}
+
+.categories {
+    padding: 0 12px 10px;
+}
+
+.category {
+    width: 100%;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    text-align: left;
+    margin-bottom: 2px;
+}
+
+.category:hover,
+.category.active {
+    background: var(--panel2);
+    color: white;
+}
+
+.notes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px 15px;
+}
+
+.note-item {
+    padding: 12px;
+    margin-bottom: 5px;
+    border-radius: 11px;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.note-item:hover {
+    background: var(--panel2);
+}
+
+.note-item.active {
+    background: #1d2637;
+    border-color: #31466d;
+}
+
+.note-title {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-preview {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-category {
+    margin-top: 6px;
+    color: #69717e;
+    font-size: 11px;
+}
+
+/* MAIN */
+
+.main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 65px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+}
+
+.status {
+    color: var(--green);
+    font-size: 12px;
+}
+
+.top-button {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 9px;
+}
+
+.top-button:hover {
+    background: var(--panel2);
+}
+
+.workspace {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
+/* EDITOR */
+
+.editor {
+    flex: 1;
+    min-width: 0;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.title-input {
+    width: 100%;
+    background: transparent;
+    color: white;
+    border: 0;
+    outline: none;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.title-input::placeholder {
+    color: #555d69;
+}
+
+.meta {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.meta select {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: white;
+    outline: none;
+}
+
+.pin-button {
+    padding: 7px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+}
+
+.pin-button.pinned {
+    color: var(--yellow);
+    border-color: #665629;
+}
+
+.content-input {
+    width: 100%;
+    min-height: 58vh;
+    resize: vertical;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #e9edf3;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.content-input::placeholder {
+    color: #565e6a;
+}
+
+.editor-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.save-status {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.delete-button {
+    padding: 8px 12px;
+    border-radius: 9px;
+    border: 1px solid #47272b;
+    background: transparent;
+    color: var(--danger);
+}
+
+.delete-button:hover {
+    background: #241619;
+}
+
+/* AI PANEL */
+
+.ai-panel {
+    width: 350px;
+    flex-shrink: 0;
+    background: #101216;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-header {
+    padding: 19px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ai-title {
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.ai-subtitle {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.ai-actions {
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+}
+
+.ai-action {
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: white;
+    text-align: left;
+}
+
+.ai-action:hover {
+    background: var(--panel2);
+    border-color: #3b4350;
+}
+
+.ai-action strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.ai-action small {
+    color: var(--muted);
+}
+
+.ai-result {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.ai-empty {
+    color: #69717e;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.result-box {
+    padding: 13px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: 14px;
+}
+
+.result-buttons {
+    display: flex;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.result-buttons button {
+    padding: 7px 9px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: white;
+}
+
+.question-area {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.question-area textarea {
+    width: 100%;
+    height: 75px;
+    resize: none;
+    padding: 9px;
+    border-radius: 9px;
+    outline: none;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: white;
+}
+
+.ask-button {
+    width: 100%;
+    margin-top: 7px;
+    padding: 10px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+}
+
+.ask-button:hover {
+    background: var(--accent-hover);
+}
+
+/* EMPTY */
+
+.empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--muted);
+    text-align: center;
+}
+
+.empty h1 {
+    color: white;
+}
+
+/* MODAL */
+
+.modal-background {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.65);
+    z-index: 100;
+}
+
+.modal-background.show {
+    display: flex;
+}
+
+.modal {
+    width: min(500px, calc(100% - 30px));
+    padding: 23px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: #171a20;
+    box-shadow: 0 25px 70px rgba(0,0,0,.5);
+}
+
+.modal h2 {
+    margin-top: 0;
+}
+
+.modal p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.modal input {
+    width: 100%;
+    padding: 11px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: #101216;
+    color: white;
+    outline: none;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.modal-buttons button {
+    padding: 9px 13px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: white;
+}
+
+.modal-buttons .primary {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #303641;
+    border-radius: 10px;
+}
+
+/* MOBILE */
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 220px;
+    }
+
+    .ai-panel {
+        width: 300px;
+    }
+}
+
+@media (max-width: 720px) {
+    .sidebar {
+        width: 190px;
+    }
+
+    .ai-panel {
+        display: none;
+    }
+
+    .editor {
+        padding: 20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            Заметки <span>AI</span>
+        </div>
+
+        <button class="new-note" onclick="createNote()">
+            ＋ Новая заметка
+        </button>
+
+        <div class="search">
+            <input
+                id="search"
+                type="text"
+                placeholder="🔎 Поиск..."
+                oninput="renderNotes()"
+            >
+        </div>
+
+        <div class="categories">
+
+            <button
+                class="category active"
+                onclick="changeCategory('Все', this)"
+            >
+                📚 Все заметки
+            </button>
+
+            <button
+                class="category"
+                onclick="changeCategory('Шпаргалки', this)"
+            >
+                📝 Шпаргалки
+            </button>
+
+            <button
+                class="category"
+                onclick="changeCategory('Учёба', this)"
+            >
+                🎓 Учёба
+            </button>
+
+            <button
+                class="category"
+                onclick="changeCategory('Идеи', this)"
+            >
+                💡 Идеи
+            </button>
+
+            <button
+                class="category"
+                onclick="changeCategory('Другое', this)"
+            >
+                📁 Другое
+            </button>
+
+        </div>
+
+        <div id="notesList" class="notes-list"></div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <span id="status" class="status">
+                ● Сохранено
+            </span>
+
+            <button class="top-button" onclick="openSettings()">
+                ⚙ Настройки
+            </button>
+
+        </header>
+
+        <div class="workspace">
+
+            <section class="editor">
+
+                <input
+                    id="title"
+                    class="title-input"
+                    placeholder="Название заметки"
+                    oninput="updateNote()"
+                >
+
+                <div class="meta">
+
+                    <select
+                        id="category"
+                        onchange="updateNote()"
+                    >
+                        <option>Шпаргалки</option>
+                        <option>Учёба</option>
+                        <option>Идеи</option>
+                        <option>Другое</option>
+                    </select>
+
+                    <button
+                        id="pinButton"
+                        class="pin-button"
+                        onclick="togglePin()"
+                    >
+                        ☆ Закрепить
+                    </button>
+
+                </div>
+
+                <textarea
+                    id="content"
+                    class="content-input"
+                    placeholder="Начни писать здесь..."
+                    oninput="updateNote()"
+                ></textarea>
+
+                <div class="editor-bottom">
+
+                    <span class="save-status">
+                        Автосохранение включено
+                    </span>
+
+                    <button
+                        class="delete-button"
+                        onclick="deleteNote()"
+                    >
+                        🗑 Удалить
+                    </button>
+
+                </div>
+
+            </section>
+
+            <aside class="ai-panel">
+
+                <div class="ai-header">
+
+                    <div class="ai-title">
+                        🤖 ChatGPT
+                    </div>
+
+                    <div class="ai-subtitle">
+                        Помощник для твоих заметок
+                    </div>
+
+                </div>
+
+                <div class="ai-actions">
+
+                    <button
+                        class="ai-action"
+                        onclick="aiAction('cheat')"
+                    >
+                        <strong>📝 Сделать шпаргалку</strong>
+                        <small>
+                            Оставить только самое важное
+                        </small>
+                    </button>
+
+                    <button
+                        class="ai-action"
+                        onclick="aiAction('short')"
+                    >
+                        <strong>✂️ Сократить</strong>
+                        <small>
+                            Сделать текст короче
+                        </small>
+                    </button>
+
+                    <button
+                        class="ai-action"
+                        onclick="aiAction('explain')"
+                    >
+                        <strong>📖 Объяснить проще</strong>
+                        <small>
+                            Объяснить тему понятным языком
+                        </small>
+                    </button>
+
+                    <button
+                        class="ai-action"
+                        onclick="aiAction('questions')"
+                    >
+                        <strong>❓ Вопросы для повторения</strong>
+                        <small>
+                            Создать вопросы и ответы
+                        </small>
+                    </button>
+
+                </div>
+
+                <div id="aiResult" class="ai-result">
+
+                    <div class="ai-empty">
+                        Здесь появится ответ ChatGPT.
+                    </div>
+
+                </div>
+
+                <div class="question-area">
+
+                    <textarea
+                        id="question"
+                        placeholder="Задай вопрос по заметке..."
+                    ></textarea>
+
+                    <button
+                        class="ask-button"
+                        onclick="askAI()"
+                    >
+                        Спросить ChatGPT
+                    </button>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- SETTINGS -->
+
+<div
+    id="settingsModal"
+    class="modal-background"
+>
+
+    <div class="modal">
+
+        <h2>⚙ Настройки</h2>
+
+        <p>
+            Настройки ChatGPT подключим на следующем этапе.
+            API-ключ здесь храниться не будет.
+        </p>
+
+        <p>
+            Сейчас сайт полностью работает как приложение
+            заметок и сохраняет данные в браузере.
+        </p>
+
+        <div class="modal-buttons">
+
+            <button onclick="closeSettings()">
+                Закрыть
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const STORAGE_KEY = "notes_ai_data";
+
+let notes = JSON.parse(
+    localStorage.getItem(STORAGE_KEY) || "[]"
+);
+
+let currentNoteId = null;
+let currentCategory = "Все";
+
+const titleInput =
+    document.getElementById("title");
+
+const contentInput =
+    document.getElementById("content");
+
+const categoryInput =
+    document.getElementById("category");
+
+const notesList =
+    document.getElementById("notesList");
+
+const statusElement =
+    document.getElementById("status");
+
+const aiResult =
+    document.getElementById("aiResult");
+
+function saveData() {
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(notes)
+    );
+}
+
+function createId() {
+
+    return Date.now().toString() +
+        Math.random()
+            .toString(16)
+            .slice(2);
+}
+
+function createNote() {
+
+    const note = {
+
+        id: createId(),
+
+        title: "Новая заметка",
+
+        content: "",
+
+        category: "Шпаргалки",
+
+        pinned: false,
+
+        updated: Date.now()
+
+    };
+
+    notes.unshift(note);
+
+    currentNoteId = note.id;
+
+    saveData();
+
+    renderNotes();
+
+    loadCurrentNote();
+
+    titleInput.focus();
+
+    titleInput.select();
+}
+
+function getCurrentNote() {
+
+    return notes.find(
+        note => note.id === currentNoteId
+    );
+}
+
+function loadCurrentNote() {
+
+    const note = getCurrentNote();
+
+    if (!note) {
+
+        titleInput.value = "";
+        contentInput.value = "";
+
+        return;
+    }
+
+    titleInput.value =
+        note.title;
+
+    contentInput.value =
+        note.content;
+
+    categoryInput.value =
+        note.category;
+
+    updatePinButton();
+
+    statusElement.textContent =
+        "● Сохранено";
+}
+
+function updateNote() {
+
+    const note = getCurrentNote();
+
+    if (!note) return;
+
+    note.title =
+        titleInput.value ||
+        "Без названия";
+
+    note.content =
+        contentInput.value;
+
+    note.category =
+        categoryInput.value;
+
+    note.updated =
+        Date.now();
+
+    saveData();
+
+    renderNotes();
+
+    statusElement.textContent =
+        "● Сохранено";
+}
+
+function renderNotes() {
+
+    const search =
+        document
+            .getElementById("search")
+            .value
+            .toLowerCase()
+            .trim();
+
+    let filtered =
+        notes.filter(note => {
+
+            const categoryOK =
+                currentCategory === "Все" ||
+                note.category === currentCategory;
+
+            const searchOK =
+                !search ||
+                note.title
+                    .toLowerCase()
+                    .includes(search) ||
+                note.content
+                    .toLowerCase()
+                    .includes(search);
+
+            return categoryOK && searchOK;
+        });
+
+    filtered.sort((a, b) => {
+
+        if (a.pinned && !b.pinned)
+            return -1;
+
+        if (!a.pinned && b.pinned)
+            return 1;
+
+        return b.updated - a.updated;
+    });
+
+    notesList.innerHTML = "";
+
+    if (filtered.length === 0) {
+
+        notesList.innerHTML = `
+            <div style="
+                color:#69717e;
+                padding:15px;
+                font-size:13px;
+            ">
+                Нет заметок
+            </div>
+        `;
+
+        return;
+    }
+
+    filtered.forEach(note => {
+
+        const element =
+            document.createElement("div");
+
+        element.className =
+            "note-item" +
+            (
+                note.id === currentNoteId
+                    ? " active"
+                    : ""
+            );
+
+        const preview =
+            note.content
+                .replace(/\s+/g, " ")
+                .slice(0, 75);
+
+        element.innerHTML = `
+
+            <div class="note-title">
+                ${note.pinned ? "📌 " : ""}
+                ${escapeHTML(
+                    note.title || "Без названия"
+                )}
+            </div>
+
+            <div class="note-preview">
+                ${escapeHTML(
+                    preview || "Пустая заметка"
+                )}
+            </div>
+
+            <div class="note-category">
+                ${escapeHTML(note.category)}
+            </div>
+        `;
+
+        element.onclick = () => {
+
+            currentNoteId =
+                note.id;
+
+            loadCurrentNote();
+
+            renderNotes();
+        };
+
+        notesList.appendChild(element);
+    });
+}
+
+function changeCategory(category, button) {
+
+    currentCategory =
+        category;
+
+    document
+        .querySelectorAll(".category")
+        .forEach(item =>
+            item.classList.remove("active")
+        );
+
+    button.classList.add("active");
+
+    renderNotes();
+}
+
+function togglePin() {
+
+    const note =
+        getCurrentNote();
+
+    if (!note) return;
+
+    note.pinned =
+        !note.pinned;
+
+    saveData();
+
+    updatePinButton();
+
+    renderNotes();
+}
+
+function updatePinButton() {
+
+    const note =
+        getCurrentNote();
+
+    if (!note) return;
+
+    const button =
+        document.getElementById("pinButton");
+
+    if (note.pinned) {
+
+        button.textContent =
+            "★ Закреплено";
+
+        button.classList.add("pinned");
+
+    } else {
+
+        button.textContent =
+            "☆ Закрепить";
+
+        button.classList.remove("pinned");
+    }
+}
+
+function deleteNote() {
+
+    const note =
+        getCurrentNote();
+
+    if (!note) return;
+
+    if (
+        !confirm(
+            "Удалить эту заметку?"
+        )
+    ) {
+        return;
+    }
+
+    notes =
+        notes.filter(
+            item =>
+                item.id !== currentNoteId
+        );
+
+    saveData();
+
+    if (notes.length > 0) {
+
+        currentNoteId =
+            notes[0].id;
+
+        loadCurrentNote();
+
+    } else {
+
+        currentNoteId = null;
+
+        titleInput.value = "";
+        contentInput.value = "";
+    }
+
+    renderNotes();
+}
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+/* AI INTERFACE */
+
+function aiAction(type) {
+
+    const note =
+        getCurrentNote();
+
+    if (!note) {
+
+        alert(
+            "Сначала создай заметку."
+        );
+
+        return;
+    }
+
+    if (!note.content.trim()) {
+
+        alert(
+            "Сначала напиши текст заметки."
+        );
+
+        return;
+    }
+
+    let message = "";
+
+    if (type === "cheat") {
+
+        message =
+            "Сделать из этой заметки короткую шпаргалку с ключевыми фактами, правилами, формулами и определениями.";
+
+    }
+
+    if (type === "short") {
+
+        message =
+            "Сократить эту заметку примерно в 3 раза, сохранив самое важное.";
+
+    }
+
+    if (type === "explain") {
+
+        message =
+            "Объяснить содержание этой заметки простыми словами, как школьнику.";
+
+    }
+
+    if (type === "questions") {
+
+        message =
+            "Создать 8 вопросов для повторения этой темы и дать короткий ответ после каждого.";
+
+    }
+
+    showComingSoon(message);
+}
+
+function askAI() {
+
+    const question =
+        document
+            .getElementById("question")
+            .value
+            .trim();
+
+    if (!question) {
+
+        alert(
+            "Напиши вопрос."
+        );
+
+        return;
+    }
+
+    showComingSoon(
+        question
+    );
+}
+
+function showComingSoon(text) {
+
+    aiResult.innerHTML = `
+
+        <div class="result-box">
+
+            <b>Запрос:</b>
+
+            ${escapeHTML(text)}
+
+            <br><br>
+
+            <span style="color:#8c95a3">
+                🤖 Подключение ChatGPT будет
+                добавлено следующим шагом.
+            </span>
+
+        </div>
+
+    `;
+}
+
+/* SETTINGS */
+
+function openSettings() {
+
+    document
+        .getElementById("settingsModal")
+        .classList.add("show");
+}
+
+function closeSettings() {
+
+    document
+        .getElementById("settingsModal")
+        .classList.remove("show");
+}
+
+/* INITIALIZATION */
+
+function initialize() {
+
+    if (notes.length === 0) {
+
+        const firstNote = {
+
+            id: createId(),
+
+            title:
+                "Моя первая шпаргалка",
+
+            content:
+`Добро пожаловать в Заметки AI!
+
+Здесь можно хранить свои шпаргалки и заметки.
+
+Пример:
+
+Физика:
+v = S / t
+
+Математика:
+(a + b)² = a² + 2ab + b²
+
+История:
+Записывай сюда важные даты и события.
+
+Когда подключим ChatGPT, он сможет:
+• сокращать текст;
+• делать шпаргалки;
+• объяснять темы;
+• создавать вопросы для повторения.`,
+
+            category:
+                "Шпаргалки",
+
+            pinned:
+                true,
+
+            updated:
+                Date.now()
+        };
+
+        notes.push(firstNote);
+
+        saveData();
+    }
+
+    currentNoteId =
+        notes[0].id;
+
+    renderNotes();
+
+    loadCurrentNote();
+}
+
+document
+    .getElementById("settingsModal")
+    .addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === this
+            ) {
+                closeSettings();
+            }
+
+        }
+    );
+
+initialize();
+
+</script>
+
+</body>
+</html>
